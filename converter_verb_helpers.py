@@ -3,7 +3,7 @@ from sys import exit
 from collections import defaultdict
 from itertools import combinations
 
-# returns True is the tense is infinitive; false otherwise
+# returns True if the tense is infinitive; false otherwise
 def infinitive(tense):
     if tense in ['5', '6']:
         return True
@@ -174,3 +174,4 @@ def addRemaining(complements, allComplements, none_complement):
             ppsorts.append("6-P _yl_p_rel")
 
     allComplements.append((generateVerbType(num_realization, none_complement) , ppsorts))
+

@@ -10,12 +10,20 @@ class verbRowConverter(rowConverter):
 
     # TODO to fix error # 21, add a lexicalPointer field into the key of the allVerbs dictionary.
     # TODO this will ensure that if two words are similar but have different pointers, they will not be merged.
+
+    #LHS: this is done below, at addToDictionary, using
+    # the new getLexicalPointer() method, which was added in converter_row.py.
+    
     # TODO One problem with this is that words in the existing lexicon do not have lexical pointers associated with them,
     # TODO so it would be more difficult filter out words from dinflections.csv that already exist in the existing lexicon.
     # TODO One work around for this would be to assign all preexisting words a default lexical pointer value, and if a new
     # TODO word matches all of the key besides the pointer value, update the pointer value in the existing word.
     # a dictionary of all verbs yet seen:
     # (stem, pred, tense, control, subject_control)->
+    # 	(person, number, gender, complements, [ppsorts])
+
+    #LHS:
+    # (stem, pred, tense, control, subject_control, lexicalPointer)->
     # 	(person, number, gender, complements, [ppsorts])
     allVerbs = {}
     # a dictionary of all verbs yet seen:
@@ -178,7 +186,7 @@ class verbRowConverter(rowConverter):
 
             verbRowConverter.pmi[int(row[1])].append(complement)
 
-    # print all the nouns from the dictionary in tdl format
+    # print all the nounsverbs from the dictionary in tdl format
     # takes as input the list of names used so far, and whether to
     # print words with punctuation in them
     @staticmethod
@@ -278,35 +286,62 @@ class verbRowConverter(rowConverter):
                                complements, typesPPSORTs)
 
             # Exception: verb can take both "l" and  "m"
-            addToTypesPPSORTs(["l", "m"],
+
+            #addToTypesPPSORTs(["l", "m"],
+            #                  "5-16-156_p_p",
+            #                  ["6-P _l_p_rel"],
+            #                  complements, typesPPSORTs)
+
+            #LHS: correction - added the PPSORT of DEP5 as well, which was missing (issue #18 and therefore also #15)
+            # Exception: verb can take both "m" and  "l" but not "al"
+            addToTypesPPSORTs(["m", "l"],
                               "5-16-156_p_p",
-                              ["6-P _l_p_rel"],
+                              ["5-P _m_p_rel", "6-P _l_p_rel"],
                               complements, typesPPSORTs)
 
             # Exception: verb can take both "al" and "m"
-            addToTypesPPSORTs(["al", "m"],
+            addToTypesPPSORTs(["m", "al"],
                               "5-16-156_p_p",
                               ["5-P _m_p_rel", "6-P _al_p_rel"],
                               complements, typesPPSORTs)
 
             # Exception: verb can take "at" and "l" (but not "m" or "l")
+            #addToTypesPPSORTs(["at", "l"],
+            #                  "2-123_n_p", [],
+            #                  complements, typesPPSORTs)
+
+            #LHS: correction - 13 is also a possible combination (issue #20 and therefore also #7)
+            # Exception: verb can take "at" and "l" (but not "m")
             addToTypesPPSORTs(["at", "l"],
-                              "2-123_n_p", [],
-                              complements, typesPPSORTs)
+                              "2-13-123_n_p", [],
+                              complements, typesPPSORTs)            
+
+            #LHS: added a case for when "m", "ym" and "at" are all possible (issue #8)
+            # Exception: verb can take "at", and both "m" and "ym" (but not "l" or "al")
+            addToTypesPPSORTs(["at", "m", "ym"],
+                              "2-15-125_n_p",
+                              ["5-P m-ym-p"],
+                              complements, typesPPSORTs)    
 
             # Exception: verb can take both "m" and  "ym" (but not "l" or "al")
             addToTypesPPSORTs(["m", "ym"],
                               "5_p",
                               ["5-P m-ym-p"],
                               complements, typesPPSORTs)
-
             addRemaining(complements, typesPPSORTs, none_complement)
+
+            
+            
 
         # store each of the possible types for the printTypes() method
         for t_ppsort in typesPPSORTs:
             verbRowConverter.allTypes.add(t_ppsort[0])
 
-        keyTuple = (self.getStem(), self.getPred(), tense, control, subject_control)
+        #LHS:
+        # (stem, pred, tense, control, subject_control)->
+        # 	(person, number, gender, complements, [ppsorts])
+        #keyTuple = (self.getStem(), self.getPred(), tense, control, subject_control)
+        keyTuple = (self.getStem(), self.getPred(), tense, control, subject_control, self.getLexicalPointer())
         pngTuple = (p, n, g)
 
         # if there is nothing with this stem, pred and type seen yet,
