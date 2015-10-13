@@ -3,18 +3,24 @@ from converter_row import *
 import converter_noun_helpers as noun
 
 class nounRowConverter(rowConverter):
-    # TODO to fix error # 21, add a lexicalPointer field into the key of the allNouns dictionary.
+    # TODO to fix error # 21, add a lexicalPointer field into the key of the allNouns dictionary.#LHS: this is done below, at addToDictionary, using
+    # the new getLexicalPointer() method, which was added in converter_row.py.
     # TODO this will ensure that if two words are similar but have different pointers, they will not be merged.
     # TODO One problem with this is that words in the existing lexicon do not have lexical pointers associated with them,
-    # TODO so it would be more difficult filter out words from dinflections.csv that already exist in the existing lexicon.
+    # TODO so it would be more difficult to filter out words from dinflections.csv that already exist in the existing lexicon.
     # TODO One work around for this would be to assign all preexisting words a default lexical pointer value, and if a new
     # TODO word matches all of the key besides the pointer value, update the pointer value in the existing word.
 
     # a dictionary of all nouns yet seen:
     # 	(stem, predicate, noun-type, definiteness)->
     # 		[(person, number, gender, possessor-person, possessor-number, possessor-gender)]
-    # this is to ensure that words that are idential in everything except
+    # this is to ensure that words that are identical in everything except
     # gender or number are merged
+
+    #LHS:
+    # 	(stem, predicate, noun-type, definiteness, lexiconPointer)->
+    # 		[(person, number, gender, possessor-person, possessor-number, possessor-gender)]
+    
     allNouns = {}
 
 ##########################
@@ -85,8 +91,12 @@ class nounRowConverter(rowConverter):
             person, number, gender = getPersonNumberGender(png)
             poss_person, poss_number, poss_gender = getPersonNumberGender(possPng)
 
-            nounRowConverter.allNouns.update({(tup[0],tup[2], n_type, definiteness): \
+            #nounRowConverter.allNouns.update({(tup[0],tup[2], n_type, definiteness): \
+            #LHS: default lexical pointer for all nouns from the pre-existing lexicon
+            nounRowConverter.allNouns.update({(tup[0],tup[2], n_type, definiteness, '-1'): \
                 [(person, number, gender, poss_person, poss_number, poss_gender)]})
+
+
 
     # print all the nouns from the dictionary in tdl format
     # takes as input the list of names used so far, and whether to
@@ -128,10 +138,17 @@ class nounRowConverter(rowConverter):
 
         r = self.row  # for readability
 
+
+    #LHS:
+    # 	(stem, predicate, noun-type, definiteness, lexiconPointer)->
+    # 		[(person, number, gender, possessor-person, possessor-number, possessor-gender)]
+    
         # get all the information about the row
         (definiteness, nounType) = noun.definitenessNounType(int(r[pos_c]), \
                         r[suffixStatus_c], r[png_c], r[definiteness_c])
-        keyTuple = (self.getStem(), self.getPred(), nounType, definiteness)
+        #keyTuple = (self.getStem(), self.getPred(), nounType, definiteness)
+        #LHS:
+        keyTuple = (self.getStem(), self.getPred(), nounType, definiteness, self.getLexicalPointer())
         (person, number, gender) = noun.png(r[person_c], r[number_c], r[gender_c])
         (poss_person, poss_number, poss_gender) = noun.possessorPNG(r[png_c])
         pngData = (person, number, gender, poss_person, poss_number, poss_gender)

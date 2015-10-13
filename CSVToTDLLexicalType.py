@@ -4,6 +4,8 @@
 # where part_of_speech is the part of speech that you want to convert
 # to TDL. (e.g. noun, adjective)
 
+#LHS: there is no need to specify part_of_speech in the command
+
 from sys import argv
 from collections import defaultdict
 from converter_row import *
@@ -23,7 +25,7 @@ if __name__ == '__main__':
     getExistantEntries("lexica/lexicon.tdl")
 
     print "loading existing nouns into noun converter..."
-    nounRowConverter.loadAllNouns(partsOfSpeechList[posList_indices_c["noun"]])
+    nounRowConverter.loadAllNouns(partsOfSpeechList[posList_indices_c["noun"]])#LHS: meaning, partOFSpeechList[0], according to getExistantEntries.py
     print "loading existing adjectives into adjective converter..."
     adjRowConverter.loadAllAdjs(partsOfSpeechList[posList_indices_c["adjective"]])
     print "loading existing adverbs into adverb converter..."
@@ -67,8 +69,8 @@ if __name__ == '__main__':
     print "printing verb lexicon with punctuation..."
     verbRowConverter.printAllVerbs(lexicon_c, True, "lexica/lexicon_verb_punct.tdl")
 
-#     print "printing noun types..."
-#     nounRowConverter.printTypes("lexica/noun_types.txt")
+    print "printing noun types..."
+    nounRowConverter.printTypes("lexica/noun_types.txt")
 
     print "printing verb types..."
     verbRowConverter.printTypes("lexica/verb_types.txt")

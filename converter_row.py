@@ -38,6 +38,10 @@ class rowConverter():
 	def getStem(self):
 		return self.row[transliteration_c]
 
+	#LHS: add lexicalPointer (lexicalPointer_c is defined in spreadsheetInfo.py)
+	def getLexicalPointer(self):
+                return self.row[lexicalPointer_c]
+
 	# consturcts the hebrew transliteration of the predicate of the row
 	def getPred(self):
 		p = ""
