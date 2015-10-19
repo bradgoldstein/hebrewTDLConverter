@@ -186,7 +186,7 @@ class verbRowConverter(rowConverter):
 
             verbRowConverter.pmi[int(row[1])].append(complement)
 
-    # print all the nounsverbs from the dictionary in tdl format
+    # print all the verbs from the dictionary in tdl format
     # takes as input the list of names used so far, and whether to
     # print words with punctuation in them
     @staticmethod
@@ -280,8 +280,15 @@ class verbRowConverter(rowConverter):
             # while removing those prepositions from the list of complements
 
             # Exception: verb can take "m", and "l", and "al"
-            addToTypesPPSORTs(["m", "l", "al"],
+            #LHS: fixing issue #22 (uncovered in issue #18) - if there's a none complement alternate, include it.
+            if not none_complement:
+                addToTypesPPSORTs(["m", "l", "al"],
                                "5-16-156_p_p",
+                               ["5-P _m_p_rel", "6-P al-l-p"],
+                               complements, typesPPSORTs)
+            else:
+                addToTypesPPSORTs(["m", "l", "al"],
+                               "-15-16-156_p_p",
                                ["5-P _m_p_rel", "6-P al-l-p"],
                                complements, typesPPSORTs)
 
@@ -293,17 +300,31 @@ class verbRowConverter(rowConverter):
             #                  complements, typesPPSORTs)
 
             #LHS: correction - added the PPSORT of DEP5 as well, which was missing (issue #18 and therefore also #15)
+            #LHS: fixing issue #22 (uncovered in issue #18) - if there's a none complement alternate, include it.
             # Exception: verb can take both "m" and  "l" but not "al"
-            addToTypesPPSORTs(["m", "l"],
+            if not none_complement:
+                addToTypesPPSORTs(["m", "l"],
                               "5-16-156_p_p",
                               ["5-P _m_p_rel", "6-P _l_p_rel"],
                               complements, typesPPSORTs)
+            else:
+                addToTypesPPSORTs(["m", "l"],
+                              "-15-16-156_p_p",
+                              ["5-P _m_p_rel", "6-P _l_p_rel"],
+                              complements, typesPPSORTs)                
 
+            #LHS: fixing issue #22 (uncovered in issue #18) - if there's a none complement alternate, include it.
             # Exception: verb can take both "al" and "m"
-            addToTypesPPSORTs(["m", "al"],
+            if not none_complement:
+                addToTypesPPSORTs(["m", "al"],
                               "5-16-156_p_p",
                               ["5-P _m_p_rel", "6-P _al_p_rel"],
                               complements, typesPPSORTs)
+            else:
+                addToTypesPPSORTs(["m", "al"],
+                              "-15-16-156_p_p",
+                              ["5-P _m_p_rel", "6-P _al_p_rel"],
+                              complements, typesPPSORTs)                
 
             # Exception: verb can take "at" and "l" (but not "m" or "l")
             #addToTypesPPSORTs(["at", "l"],
@@ -312,22 +333,42 @@ class verbRowConverter(rowConverter):
 
             #LHS: correction - 13 is also a possible combination (issue #20 and therefore also #7)
             # Exception: verb can take "at" and "l" (but not "m")
-            addToTypesPPSORTs(["at", "l"],
+            #LHS: fixing issue #22 (uncovered in issue #18) - if there's a none complement alternate, include it.
+            if not none_complement:
+                addToTypesPPSORTs(["at", "l"],
                               "2-13-123_n_p", [],
-                              complements, typesPPSORTs)            
+                              complements, typesPPSORTs)
+            else:
+                addToTypesPPSORTs(["at", "l"],
+                              "-12-13-123_n_p", [],
+                              complements, typesPPSORTs)                
 
             #LHS: added a case for when "m", "ym" and "at" are all possible (issue #8)
+            #LHS: fixing issue #22 (uncovered in issue #18) - if there's a none complement alternate, include it.                
             # Exception: verb can take "at", and both "m" and "ym" (but not "l" or "al")
-            addToTypesPPSORTs(["at", "m", "ym"],
+            if not none_complement:
+                addToTypesPPSORTs(["at", "m", "ym"],
                               "2-15-125_n_p",
                               ["5-P m-ym-p"],
-                              complements, typesPPSORTs)    
-
+                              complements, typesPPSORTs)
+            else:
+                addToTypesPPSORTs(["at", "m", "ym"],
+                              "-12-15-125_n_p",
+                              ["5-P m-ym-p"],
+                              complements, typesPPSORTs)
+            #LHS: fixing issue #22 (uncovered in issue #18) - if there's a none complement alternate, include it.
             # Exception: verb can take both "m" and  "ym" (but not "l" or "al")
-            addToTypesPPSORTs(["m", "ym"],
+            if not none_complement:
+                addToTypesPPSORTs(["m", "ym"],
                               "5_p",
                               ["5-P m-ym-p"],
                               complements, typesPPSORTs)
+            else:
+                addToTypesPPSORTs(["m", "ym"],
+                              "-15_p",
+                              ["5-P m-ym-p"],
+                              complements, typesPPSORTs)
+                
             addRemaining(complements, typesPPSORTs, none_complement)
 
             
@@ -403,7 +444,7 @@ class verbRowConverter(rowConverter):
             return False
 
     # returns the tdl formatted string given key, value tuples and complement dictionary
-    # in the allNouns dictionary
+    # in the allVerbs dictionary
     @staticmethod
     def rowToTDL(key, png, complement, lexicon):
 
