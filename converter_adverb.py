@@ -1,6 +1,8 @@
 
 from converter_row import *
 
+#LHS: Added a lexical pointer field and then added a solution to avoid entries that are the same as
+#pre-existing ones (same solution as in converter_noun.py and converter_verb.py, see elaboration there.) 
 class advRowConverter(rowConverter):
 	# keeps a set of tuples of (stem, pred)
 	allAdvs = set()
@@ -12,7 +14,8 @@ class advRowConverter(rowConverter):
 		assert len(advRowConverter.allAdvs) is 0
 
 		for adv in advTuples:
-			advRowConverter.allAdvs.add((adv[0],adv[2]))
+                        #advRowConverter.allAdvs.add((adv[0],adv[2]))
+			advRowConverter.allAdvs.add((adv[0],adv[2], DEFAULT_LEXICAL_POINTER))#LHS: added default lexical pointer
 
 	# print all the adjectives from the set in tdl format
 	# takes as input the list of names used so far, and whether to
@@ -40,7 +43,9 @@ class advRowConverter(rowConverter):
 		if self.irrelevant():
 			return
 
-		advRowConverter.allAdvs.add((self.getStem(), self.getPred()))
+		#advRowConverter.allAdvs.add((self.getStem(), self.getPred()))
+		if (self.getStem(), self.getPred(), DEFAULT_LEXICAL_POINTER) not in advRowConverter.allAdvs:#LHS - avoid adding entries that were in the pre-existing lexicon
+                        advRowConverter.allAdvs.add((self.getStem(), self.getPred(), self.getLexicalPointer()))#LHS
 
 	# returns true if the row is irrelevant
 	def irrelevant(self):

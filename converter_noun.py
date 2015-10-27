@@ -11,6 +11,10 @@ class nounRowConverter(rowConverter):
     # TODO One work around for this would be to assign all preexisting words a default lexical pointer value, and if a new
     # TODO word matches all of the key besides the pointer value, update the pointer value in the existing word.
 
+    #LHS: I did something similar below, in addToDictionary, where something will be added only if it's not already there, but I also added
+    #that it won't be added if an entry that is almost identical (but with a lexical pointer of '-1') is already there. As pre-existing
+    #lexical entries get a default lexical pointer of -1 (I added this to loadAllNouns()), this takes care of the redundant entries problem.
+
     # a dictionary of all nouns yet seen:
     # 	(stem, predicate, noun-type, definiteness)->
     # 		[(person, number, gender, possessor-person, possessor-number, possessor-gender)]
@@ -40,7 +44,8 @@ class nounRowConverter(rowConverter):
     # load the allNouns dictionary given a set of tuples (stem, type, predicate)
     # the allNouns dictionary must be empty when this method is called
     @staticmethod
-    def loadAllNouns(nounTuples):
+    def loadAllNouns(nounTuples):#LHS: CSVToTDLLexicalType calls this method;
+        #LHS: nounTuples starts out as a list that contains a set of tuples (stem, type, predicate) of all the preexisting nouns
         assert len(nounRowConverter.allNouns) is 0
 
         for tup in nounTuples:
@@ -53,7 +58,8 @@ class nounRowConverter(rowConverter):
 
             # special word
             if tup[0] == "special_word":
-                nounRowConverter.allNouns.update({(tup[0],tup[1], 0, 0):[0]})
+                #nounRowConverter.allNouns.update({(tup[0],tup[1], 0, 0):[0]})
+                nounRowConverter.allNouns.update({(tup[0],tup[1], 0, 0, DEFAULT_LEXICAL_POINTER):[0]})#LHS: added default lexical pointer
                 continue
 
             # proper noun
@@ -92,11 +98,9 @@ class nounRowConverter(rowConverter):
             poss_person, poss_number, poss_gender = getPersonNumberGender(possPng)
 
             #nounRowConverter.allNouns.update({(tup[0],tup[2], n_type, definiteness): \
-            #LHS: default lexical pointer for all nouns from the pre-existing lexicon
-            nounRowConverter.allNouns.update({(tup[0],tup[2], n_type, definiteness, '-1'): \
+            #LHS: set a default lexical pointer for all nouns from the pre-existing lexicon
+            nounRowConverter.allNouns.update({(tup[0],tup[2], n_type, definiteness, DEFAULT_LEXICAL_POINTER): \
                 [(person, number, gender, poss_person, poss_number, poss_gender)]})
-
-
 
     # print all the nouns from the dictionary in tdl format
     # takes as input the list of names used so far, and whether to
@@ -156,8 +160,18 @@ class nounRowConverter(rowConverter):
         # if there is nothing with this stem, pred and type seen yet,
         # insert it into the dictionary
         valueTuple = nounRowConverter.allNouns.get(keyTuple)
+        
+        preexistingKeyTuple = (self.getStem(), self.getPred(), nounType, definiteness, DEFAULT_LEXICAL_POINTER)##LHS - the key is unchanged, except the lexical pointer
+        preexistingValueTuple = nounRowConverter.allNouns.get(preexistingKeyTuple)##LHS
+
+        #LHS: if printing is needed for debugging: 
+        #if preexistingValueTuple is not None:
+        #    print(str(preexistingKeyTuple) + ' -> ' + str(preexistingValueTuple) )
+   
         if valueTuple is None:
-            nounRowConverter.allNouns.update({keyTuple: [pngData]})
+            if preexistingValueTuple is None:#LHS - added this-subcondition. We only want the entry to be added if it doesn't already appear,
+                #including if there's a similar entry in the pre-existing lexicon
+                nounRowConverter.allNouns.update({keyTuple: [pngData]})
         # otherwise keep track of all the png values associated with
         # this stem, pred and type
         elif pngData not in valueTuple:

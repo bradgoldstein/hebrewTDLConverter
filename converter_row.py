@@ -2,6 +2,7 @@
 from spreadsheetInfo import *
 from utfToTransliteration import *
 from converter_helpers import *
+DEFAULT_LEXICAL_POINTER = "-1"
 
 class rowConverter():
 	def __init__(self, row):

@@ -65,7 +65,8 @@ class verbRowConverter(rowConverter):
             stem = title[0]
 
             # key for if the word is special
-            specialKey = (stem, tup[1], "special_word", '', '')
+            #specialKey = (stem, tup[1], "special_word", '', '')
+            specialKey = (stem, tup[1], "special_word", '', '', DEFAULT_LEXICAL_POINTER)#LHS - add the default lexical pointer
 
             # assume the word is not a control word
             control = False
@@ -158,7 +159,13 @@ class verbRowConverter(rowConverter):
 
             # (stem, pred, tense, control, subject_control)->
             # 	(person, number, gender,[complements], [ppsorts])
-            keyTup = (stem, pred, tense, control, subject_control)
+
+            #LHS - add the lexical pointer field
+            # (stem, pred, tense, control, subject_control, default_lexical_pointer)->
+            # 	(person, number, gender,[complements], [ppsorts])            
+
+            #keyTup = (stem, pred, tense, control, subject_control)
+            keyTup = (stem, pred, tense, control, subject_control, DEFAULT_LEXICAL_POINTER)#LHS - see above
 
             verbRowConverter.allVerbs.update({keyTup: [(person, number, gender)]})
             verbRowConverter.verbsComplements.update({keyTup: ([], [(complement, ppsorts)])})
@@ -388,8 +395,14 @@ class verbRowConverter(rowConverter):
         # if there is nothing with this stem, pred and type seen yet,
         # insert it into the dictionary
         valueTuple = verbRowConverter.allVerbs.get(keyTuple)
+
+        preexistingKeyTuple = (self.getStem(), self.getPred(), tense, control, subject_control, DEFAULT_LEXICAL_POINTER)##LHS - the key is unchanged, except the lexical pointer
+        preexistingValueTuple = verbRowConverter.allVerbs.get(preexistingKeyTuple)##LHS
+        
         if valueTuple is None:
-            verbRowConverter.allVerbs.update({keyTuple:[pngTuple]})
+            if preexistingValueTuple is None:#LHS - added this-subcondition. We only want the entry to be added if it doesn't already appear,
+                #including if there's a similar entry in the pre-existing lexicon
+                verbRowConverter.allVerbs.update({keyTuple:[pngTuple]})
 
         # otherwise keep track of all the png values associated with key
         elif (person, number, gender) not in valueTuple:

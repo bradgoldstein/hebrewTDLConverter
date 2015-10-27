@@ -2,6 +2,8 @@
 from converter_row import *
 import converter_adjective_helpers as adj
 
+#LHS: Added a lexical pointer field and then added a solution to avoid entries that are the same as
+#pre-existing ones (same solution as in converter_noun.py and converter_verb.py, see elaboration there.) 
 class adjRowConverter(rowConverter):
 	# keeps a dictionary from tuples of
 	# (stem, pred, definiteness, number) -> list[gender]
@@ -16,7 +18,8 @@ class adjRowConverter(rowConverter):
 		# special case
 		for adj in adjTuples:
 			if adj[0] == "special_word":
-				adjRowConverter.allAdjs.update({(adj[0],adj[1],0,0): 0})
+				#adjRowConverter.allAdjs.update({(adj[0],adj[1],0,0): 0})
+				adjRowConverter.allAdjs.update({(adj[0],adj[1],0,0, DEFAULT_LEXICAL_POINTER): 0})#LHS: added default lexical pointer
 				continue
 
 			adjType = adj[1].split('-')
@@ -39,7 +42,9 @@ class adjRowConverter(rowConverter):
 			if definiteness == "special":
 				number = adj[1] # save the entire type in the number field
 
-			key = (adj[0], adj[2], definiteness, number)
+			#key = (adj[0], adj[2], definiteness, number)
+			#LHS: set a default lexical pointer for all adjs from the pre-existing lexicon
+			key = (adj[0], adj[2], definiteness, number, DEFAULT_LEXICAL_POINTER)
 			adjRowConverter.allAdjs.update({key: [gender]})
 
 	# print all the adjectives from the dictionary in tdl format
@@ -78,15 +83,24 @@ class adjRowConverter(rowConverter):
 		r = self.row  # for readability
 
 		# get the key for the dictionary, and the value (gender)
+		#keyTuple = (self.getStem(), self.getPred(), \
+			#adj.definiteness(r[definiteness_c]), adj.number(r[number_c]))
 		keyTuple = (self.getStem(), self.getPred(), \
-			adj.definiteness(r[definiteness_c]), adj.number(r[number_c]))
+			adj.definiteness(r[definiteness_c]), adj.number(r[number_c]), self.getLexicalPointer())#LHS
 		gender = adj.gender(r[gender_c], r[transliteration_c])
-
 		# find the already existant genders associated with this key
 		genderList = adjRowConverter.allAdjs.get(keyTuple)
+		
+		preexistingKeyTuple = (self.getStem(), self.getPred(), \
+			adj.definiteness(r[definiteness_c]), adj.number(r[number_c]), DEFAULT_LEXICAL_POINTER)##LHS - the key is unchanged, except the lexical pointer
+		preexistingGenderList = adjRowConverter.allAdjs.get(preexistingKeyTuple)##LHS
+
+
 		# if there are none, add our gender
 		if genderList is None:
-			adjRowConverter.allAdjs.update({keyTuple: [gender]})
+			if preexistingGenderList is None:#LHS - added this-subcondition. We only want the entry to be added if it doesn't already appear,
+                        #including if there's a similar entry in the pre-existing lexicon
+				adjRowConverter.allAdjs.update({keyTuple: [gender]})
 		# else add the gender to the list
 		else:
 			genderList.append(gender)
