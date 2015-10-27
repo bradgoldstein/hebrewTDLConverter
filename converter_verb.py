@@ -88,7 +88,10 @@ class verbRowConverter(rowConverter):
                  'oc' in title or \
                  'pron' in title or \
                  'obj-cntrl' in wordType or \
-                 'unacc_past' in wordType:
+                 'unacc_past' in wordType or \
+                 'unacc_present' in wordType or \#LHS: additional unaccusative types have been added to the input lexicon
+                 'unacc_future' in wordType or \#LHS
+                 'unacc_infinitive' in wordType:#LHS
                 addToLexicon(stem, lexicon)
                 verbRowConverter.allVerbs.update({specialKey: [('', '', '')]})
                 verbRowConverter.verbsComplements.update({specialKey: ({})})
