@@ -15,17 +15,18 @@ from converter_adverb import *
 from converter_verb import *
 from CSV_helpers import openCSV
 import converter_factory as factory
-from getExistantEntries import *
+from getExistantEntries import *#LHS, so, partsOfSpeechList is accessible, as well as posList_indices_c
 
 if __name__ == '__main__':
     lexicon_c = defaultdict(int) # a dictionary with all the stems and the number of times they appear
 
     # Call the function with the original file, lexicon.tdl
     print "loading the existing tdl lexicon..."
-    getExistantEntries("lexica/lexicon.tdl")
+    getExistantEntries("lexica/lexicon.tdl")#LHS: parse the pre-existing lexicon
 
     print "loading existing nouns into noun converter..."
-    nounRowConverter.loadAllNouns(partsOfSpeechList[posList_indices_c["noun"]])#LHS: meaning, partOFSpeechList[0], according to getExistantEntries.py
+    nounRowConverter.loadAllNouns(partsOfSpeechList[posList_indices_c["noun"]])#LHS: meaning, partOFSpeechList[0], according to getExistantEntries.py;
+    #LHS: what is passed to loadAllNouns is a list that contains a set of tuples (stem, type, predicate) of all the preexisting types of this specific POS
     print "loading existing adjectives into adjective converter..."
     adjRowConverter.loadAllAdjs(partsOfSpeechList[posList_indices_c["adjective"]])
     print "loading existing adverbs into adverb converter..."
@@ -51,6 +52,20 @@ if __name__ == '__main__':
             continue
 
         rowToTDL.addToDictionary()
+
+    '''#LHS: print out the entire adjective/noun/verb dictionary
+    adjKeys = adjRowConverter.allAdjs.keys()
+    for k in adjKeys:
+        print(str(k) + ' -> ' + str(adjRowConverter.allAdjs[k]))
+    nounKeys = nounRowConverter.allNouns.keys()
+    for k in nounKeys:
+        print(str(k) + ' -> ' + str(nounRowConverter.allNouns[k]))
+    verbKeys = verbRowConverter.allVerbs.keys()
+    for k in verbKeys:
+        print(str(k) + ' -> ' + str(verbRowConverter.allVerbs[k]))
+    #LHS: print out all the adverbs
+    for item in advRowConverter.allAdvs:
+        print(str(item))'''        
 
     print "printing noun lexicon..."
     nounRowConverter.printAllNouns(lexicon_c, False, "lexica/lexicon_noun.tdl")
