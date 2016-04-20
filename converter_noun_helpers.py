@@ -3,9 +3,13 @@
 from spreadsheetInfo import *
 from sys import exit
 
+'''
 # only pronouns that we are interested in including in the lexicon
 wantedPronouns = ["ani", "anw", "anwki", "anxnw", "at", "ath", "atm", "atn", 
-	"hiw", "hwa", "hm", "hn"]
+	"hia", "hwa", "hm", "hn"] '''
+
+# LHS: later decision - we don't want to include any automatically created pronouns, we simply create them ourselves (but with a PRED that isn't "hwa").
+wantedPronouns = []
 
 # returns True if the word is a pronoun not in the list of wantedPronouns,
 # and false otherwise
