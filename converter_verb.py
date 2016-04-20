@@ -31,6 +31,13 @@ class verbRowConverter(rowConverter):
     #   {arguments->([realizations], [PPSORTS])} of those arguments
     verbsComplements = {}
 
+    #LHS:
+    # Special verbs, based on preexisting special verbs from our lexicon. This is a small group, so a copy of also saved
+    # separately, so that they can be queried more quickly.
+    # The structure is the same as for allVerbs, but as far as the key goes, the entire structure is under "pred", there is "special_word" for "tense",
+    # and both controls have an empty string, while the lexical pointer is the default one.
+    specialVerbs = {}
+
     # for printing out all the verb types
     allTypes = set()
     @staticmethod
@@ -82,19 +89,19 @@ class verbRowConverter(rowConverter):
             # if there is another ending, the word is special.
             # save the entire word in the pred field
             # and mark the tense as "special"
+            #LHS: additional unaccusative types have been added to the input lexicon
             elif 'r' in title or \
                  'v' in title or \
                  'sc' in title or \
                  'oc' in title or \
                  'pron' in title or \
                  'obj-cntrl' in wordType or \
-                 'unacc_past' in wordType or \
-                 'unacc_present' in wordType or \#LHS: additional unaccusative types have been added to the input lexicon
-                 'unacc_future' in wordType or \#LHS
-                 'unacc_infinitive' in wordType:#LHS
+                 'unacc' in wordType:
                 addToLexicon(stem, lexicon)
                 verbRowConverter.allVerbs.update({specialKey: [('', '', '')]})
+                verbRowConverter.specialVerbs.update({specialKey: [('', '', '')]})#LHS
                 verbRowConverter.verbsComplements.update({specialKey: ({})})
+                
                 continue
 
             # error checking that the stem we found matches the regex
@@ -116,6 +123,7 @@ class verbRowConverter(rowConverter):
             if not pred_check:
                 addToLexicon(stem, lexicon)
                 verbRowConverter.allVerbs.update({specialKey: [('', '', '')]})
+                verbRowConverter.specialVerbs.update({specialKey: [('', '', '')]})#LHS
                 verbRowConverter.verbsComplements.update({specialKey: ({})})
                 continue
 
@@ -127,7 +135,7 @@ class verbRowConverter(rowConverter):
             assert tenseCheck
             tense = tenseCheck.group(1)
             # every word should have a valid tense
-            assert tense in ["imperitive", "past", "present", "future", "infinitive"]
+            assert tense in ["imperative", "past", "present", "future", "infinitive"]
 
             basicCheck = basic_re.search(wordType)
             if basicCheck:
@@ -142,6 +150,7 @@ class verbRowConverter(rowConverter):
             if control and subject_control and complement != '2_v':
                 addToLexicon(stem + '_c', lexicon)
                 verbRowConverter.allVerbs.update({specialKey: [('', '', '')]})
+                verbRowConverter.specialVerbs.update({specialKey: [('', '', '')]})#LHS
                 verbRowConverter.verbsComplements.update({specialKey: ({})})
                 continue
 
@@ -151,6 +160,7 @@ class verbRowConverter(rowConverter):
             if 'j' in complement:
                 addToLexicon(stem, lexicon)
                 verbRowConverter.allVerbs.update({specialKey: [('', '', '')]})
+                verbRowConverter.specialVerbs.update({specialKey: [('', '', '')]})#LHS
                 verbRowConverter.verbsComplements.update({specialKey: ({})})
                 continue
 
@@ -405,7 +415,8 @@ class verbRowConverter(rowConverter):
         if valueTuple is None:
             if preexistingValueTuple is None:#LHS - added this-subcondition. We only want the entry to be added if it doesn't already appear,
                 #including if there's a similar entry in the pre-existing lexicon
-                verbRowConverter.allVerbs.update({keyTuple:[pngTuple]})
+                if self.noSpecialCounterpartExists(preexistingKeyTuple):#LHS: also make sure that there's no special word entry for this STRING&PRED combination
+                    verbRowConverter.allVerbs.update({keyTuple:[pngTuple]})
 
         # otherwise keep track of all the png values associated with key
         elif (person, number, gender) not in valueTuple:
@@ -413,6 +424,19 @@ class verbRowConverter(rowConverter):
 
         # keep track of the args and realizations separately for printing
         verbRowConverter.verbsComplements.update({keyTuple: (complements, typesPPSORTs)})
+
+    #LHS: makes sure that there is no pre-existing special word that has the same STEM and PRED values as this candidate entry; This requires going over all
+    #forty something special verbs, because of the way they are stored (with their entire structure under PRED).
+    def noSpecialCounterpartExists(self, preexistingKeyTuple):
+        specialVerbsKeys = verbRowConverter.specialVerbs.keys()
+        preexistingStem = preexistingKeyTuple[0]
+        preexistingPred = preexistingKeyTuple[1]
+        preexistingTense = preexistingKeyTuple[2]
+        for k in specialVerbsKeys:
+            if k[0] == preexistingStem and k[1].startswith(preexistingPred) and k[2] == 'special_word' and k[3] == '' and k[4] == '' and k[5] == '-1' and preexistingTense in k[1]:
+                return False
+        return True  
+        
 
     # returns true if the row is irrelevant
     def irrelevant(self):
@@ -455,7 +479,7 @@ class verbRowConverter(rowConverter):
         elif r[suffixStatus_c] == '1':
             return True
 
-        # the noun is relevant
+        # the verb is relevant
         else:
             return False
 
@@ -463,85 +487,98 @@ class verbRowConverter(rowConverter):
     # in the allVerbs dictionary
     @staticmethod
     def rowToTDL(key, png, complement, lexicon):
-
         # since there can be several tdl's from one row, return a list
         # of the tdl formats
         tdls = []
 
-        # object control verbs
-        if key[3] and not key[4]:
-            type = complement[1][0][0]
-            if png == '':
-                png_text = ''
-            else:
-                png_text = "LOCAL.CAT.HEAD.CNCRD png-" + png + ",\n     "
+        comps_list = complement[1]
+        i = 0#LHS: add a counter to mark the first go through, so as to not create multiple control entries unneccessarily
+        for c in comps_list:#LHS: loop through all possible entries (complement[1] actually stores possible entries)
 
-            verb_name = addToLexicon(replaceSpaceWithUnderscore(key[0] + '_c'), lexicon)
-            tdls.append(''.join((verb_name, " := arg1", type, "_obj-cntrl_", key[2], "_le &\n",
-                                 "  [ STEM < \"", breakUpWordWithComma(key[0]),  "\" >,\n",
-                                 "   SYNSEM [ ", png_text,
-                                 "LKEYS.KEYREL.PRED _",key[1], "_v_rel ] ].\n")))
 
-            return tdls
-
-        # subject control verbs
-        elif key[3]:
-            verb_name = addToLexicon(replaceSpaceWithUnderscore(key[0] + '_c'), lexicon)
-            if png == '':
-                png_text, last_bracket = "   SYNSEM.", ""
-            else:
-                png_text, last_bracket = "   SYNSEM [ LOCAL.CAT [ HEAD.CNCRD png-" + png + " ],\n" + "    ", " ]"
-
-            tdls.append(''.join((verb_name, " := arg12_v_subj-cntrl_", key[2],
-                                 "_le &\n  [ STEM < \"",
-                                breakUpWordWithComma(key[0]),
-                                 "\" >,\n", png_text, "LKEYS.KEYREL.PRED _", key[1], "_v_rel ]", last_bracket, ".\n")))
-
-        # ensure that invalid types are not written for pre-existing verbs with subject control
-        try:
-            if key[3] and key[4] and complement[1][0][0] == '2_v':
-                return tdls
-        except:
-            pass
-
-        # if there are no complements, all TDL values have been found.
-        if len(complement[1]) is 0:
-            return tdls
-
-        type = complement[1][0][0]
-        ppsorts = complement[1][0][1]
-
-        # get the correct syntax if there are more than 1 PPSORT's
-        if len(ppsorts) > 1:
-            ppsorts_text = "SYNSEM.LOCAL.CAT.VAL.PPSORT [ "
-            for i, ppsort in enumerate(ppsorts):
-                if i == 0:
-                    ppsorts_text = ''.join((ppsorts_text, "DEP", ppsort, ",\n"))
-                elif i == (len(ppsorts) - 1):
-                    ppsorts_text = ''.join((ppsorts_text, "                                 DEP", ppsort, " ],\n"))
+            # object control verbs
+            #if key[3] and not key[4]:
+            if key[3] and not key[4] and i == 0:#LHS (only if this is the first go through)
+                #type = c[1][0][0]
+                type = c[0]#LHS??
+                if png == '':
+                    png_text = ''
                 else:
-                    ppsorts_text = ''.join((ppsorts_text, "                                 DEP", ppsort, ",\n"))
+                    png_text = "LOCAL.CAT.HEAD.CNCRD png-" + png + ",\n     "
 
-        # get the correct syntax if there is exactly 1 PPSORT
-        elif len(ppsorts) == 1:
-            ppsorts_text = ''.join(("SYNSEM.LOCAL.CAT.VAL.PPSORT.DEP", ppsorts[0], ",\n"))
+                verb_name = addToLexicon(replaceSpaceWithUnderscore(key[0] + '_c'), lexicon)
+                tdls.append(''.join((verb_name, " := arg1", type, "_obj-cntrl_", key[2], "_le &\n",
+                                     "  [ STEM < \"", breakUpWordWithComma(key[0]),  "\" >,\n",
+                                     "   SYNSEM [ ", png_text,
+                                     "LKEYS.KEYREL.PRED _",key[1], "_v_rel ] ].\n")))
 
-        # get the correct syntax if there are no PPSORT's
-        else:
-            ppsorts_text = ""
+                return tdls
 
-        # get the correct syntax for the png value
-        if png == '':
-            png_text = ""
-        else:
-            png_text = "   SYNSEM.LOCAL.CAT.HEAD.CNCRD png-" + png + ",\n"
+            # subject control verbs
+            #elif key[3]:
+            elif key[3] and key[4] and i == 0:#LHS (only if this is the first go through)
+                verb_name = addToLexicon(replaceSpaceWithUnderscore(key[0] + '_c'), lexicon)
+                if png == '':
+                    png_text, last_bracket = "   SYNSEM.", ""
+                else:
+                    png_text, last_bracket = "   SYNSEM [ LOCAL.CAT [ HEAD.CNCRD png-" + png + " ],\n" + "    ", " ]"
 
-        # append the entire .tdl syntax
-        tdls.append(''.join((addToLexicon(replaceSpaceWithUnderscore(key[0]), lexicon), " := arg1", type, "_", key[2],
-                                 "_le &\n  [ STEM < \"",
-                                 breakUpWordWithComma(key[0]),
-                                 "\" >,\n", png_text,
-                                 "   ", ppsorts_text,
-                                 "   SYNSEM.LKEYS.KEYREL.PRED _", key[1], "_v_rel ].\n")))
+                tdls.append(''.join((verb_name, " := arg12_v_subj-cntrl_", key[2],
+                                     "_le &\n  [ STEM < \"",
+                                    breakUpWordWithComma(key[0]),
+                                     "\" >,\n", png_text, "LKEYS.KEYREL.PRED _", key[1], "_v_rel ]", last_bracket, ".\n")))
+
+            # ensure that invalid types are not written for pre-existing verbs with subject control
+            try:
+                #if key[3] and key[4] and c[1][0][0] == '2_v':
+                #if key[3] and key[4] and c[0] == '2_v':
+                if key[3] and key[4] and i == 0 and c[0] == '2_v':#LHS (only if this is the first go through)
+                    return tdls
+            except:
+                pass
+
+
+            i += 1#LHS
+
+            # if there are no complements, all TDL values have been found.
+            #if len(c[1]) is 0:
+            if len(c) is 0:
+                return tdls
+
+            type = c[0]
+            ppsorts = c[1]            
+
+            # get the correct syntax if there are more than 1 PPSORT's
+            if len(ppsorts) > 1:
+                ppsorts_text = "SYNSEM.LOCAL.CAT.VAL.PPSORT [ "
+                for i, ppsort in enumerate(ppsorts):
+                    if i == 0:
+                        ppsorts_text = ''.join((ppsorts_text, "DEP", ppsort, ",\n"))
+                    elif i == (len(ppsorts) - 1):
+                        ppsorts_text = ''.join((ppsorts_text, "                                 DEP", ppsort, " ],\n"))
+                    else:
+                        ppsorts_text = ''.join((ppsorts_text, "                                 DEP", ppsort, ",\n"))
+
+            # get the correct syntax if there is exactly 1 PPSORT
+            elif len(ppsorts) == 1:
+                ppsorts_text = ''.join(("SYNSEM.LOCAL.CAT.VAL.PPSORT.DEP", ppsorts[0], ",\n"))
+
+            # get the correct syntax if there are no PPSORT's
+            else:
+                ppsorts_text = ""
+
+            # get the correct syntax for the png value
+            if png == '':
+                png_text = ""
+            else:
+                png_text = "   SYNSEM.LOCAL.CAT.HEAD.CNCRD png-" + png + ",\n"
+
+            # append the entire .tdl syntax
+            tdls.append(''.join((addToLexicon(replaceSpaceWithUnderscore(key[0]), lexicon), " := arg1", type, "_", key[2],
+                                     "_le &\n  [ STEM < \"",
+                                     breakUpWordWithComma(key[0]),
+                                     "\" >,\n", png_text,
+                                     "   ", ppsorts_text,
+                                     "   SYNSEM.LKEYS.KEYREL.PRED _", key[1], "_v_rel ].\n")))
 
         return tdls
