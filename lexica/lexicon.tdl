@@ -5,6 +5,13 @@
 ;=============================================================================
 ;================================= NOUNS =====================================
 ;=============================================================================
+hspr := def-cmn-3sm-noun-lex &
+  [ STEM < "hspr" >,
+   SYNSEM.LKEYS.KEYREL.PRED _spr_n_rel ].
+dn := 3sm-proper-noun-lex & 
+  [ STEM < "dn" >,
+    SYNSEM.LKEYS.KEYREL.PRED _dn_n_rel ]. 
+   
 hklim := def-cmn-3pm-noun-lex &
   [ STEM < "hklim" >,
    SYNSEM.LKEYS.KEYREL.PRED _kli_n_rel ].
@@ -172,14 +179,6 @@ hywgh := def-cmn-3sf-noun-lex &
   [ STEM < "hywgh" >,
     SYNSEM.LKEYS.KEYREL.PRED _ywgh_n_rel ].
 
-ani := nom-pron-1s-noun-lex &
-  [ STEM < "ani" >,
-    SYNSEM.LKEYS.KEYREL.PRED _ani_n_rel ].
-
-hwa_noun := nom-pron-3sm-noun-lex &
-  [ STEM < "hwa" >,
-    SYNSEM.LKEYS.KEYREL.PRED _hwa_n_rel ].
-
 irwelim := 3sf-proper-noun-lex &
   [ STEM < "irwelim" >,
     SYNSEM.LKEYS.KEYREL.PRED _irwelim_n_rel ].
@@ -194,7 +193,7 @@ dnh := 3sf-proper-noun-lex &
 
 ;LHS: QUE
 ;LHS 02/02/15: adding CNCRD (so as not to get "mi nplti")
-mi := np-qpart-lex-item & 
+mi_q := np-qpart-lex-item & 
   [ STEM < "mi" >,
    SYNSEM [ LKEYS.KEYREL.PRED _mi_n_rel ,
 	    LOCAL [ CONT.HOOK.INDEX.PNG #png,
@@ -230,6 +229,54 @@ xwl := indef-cmn-3sm-noun-lex &
 bti := cs-3pm-noun-lex &
   [ STEM < "bti" >,
    SYNSEM.LKEYS.KEYREL.PRED _bit_n_rel ].
+
+ani := nom-pron-1s-noun-lex &
+  [ STEM < "ani" >,
+    SYNSEM.LKEYS.KEYREL.PRED _ani_n_rel ].
+
+hwa_noun := nom-pron-3sm-noun-lex &
+  [ STEM < "hwa" >,
+    SYNSEM.LKEYS.KEYREL.PRED _hwa_n_rel ].
+
+hia_noun := nom-pron-3sf-noun-lex &
+  [ STEM < "hia" >,
+    SYNSEM.LKEYS.KEYREL.PRED _hia_n_rel ].    
+
+hn := nom-pron-3pf-noun-lex &
+  [ STEM < "hn" >,
+   SYNSEM.LKEYS.KEYREL.PRED _hn_n_rel ].
+
+at := nom-pron-2sf-noun-lex &
+  [ STEM < "at" >,
+   SYNSEM.LKEYS.KEYREL.PRED _at_n_rel ].
+
+atn := nom-pron-2pf-noun-lex &
+  [ STEM < "atn" >,
+   SYNSEM.LKEYS.KEYREL.PRED _atn_n_rel ].   
+
+hm := nom-pron-3pm-noun-lex &
+  [ STEM < "hm" >,
+   SYNSEM.LKEYS.KEYREL.PRED _hm_n_rel ].
+
+anwki := nom-pron-1s-noun-lex &
+  [ STEM < "anwki" >,
+   SYNSEM.LKEYS.KEYREL.PRED _anwki_n_rel ].
+   
+atm := nom-pron-2pm-noun-lex &
+  [ STEM < "atm" >,
+   SYNSEM.LKEYS.KEYREL.PRED _atm_n_rel ].
+
+anxnw := nom-pron-1p-noun-lex &
+  [ STEM < "anxnw" >,
+   SYNSEM.LKEYS.KEYREL.PRED _anxnw_n_rel ].
+
+ath := nom-pron-2sm-noun-lex &
+  [ STEM < "ath" >,
+   SYNSEM.LKEYS.KEYREL.PRED _ath_n_rel ].
+   
+anw := nom-pron-1p-noun-lex &
+  [ STEM < "anw" >,
+   SYNSEM.LKEYS.KEYREL.PRED _anw_n_rel ].   
    
 ;;;;;;;;;;;;;;;;;;;
 ;;Idiomatic nouns;;
@@ -246,13 +293,13 @@ hyc_i := def-cmn-3sm-noun-lex &
 ;POSS Nurit 12/2/15 - ica m hklim/kliw
 hklim_i := def-cmn-3pm-noun-lex &
   [ STEM < "hklim" >,
-   SYNSEM.LKEYS.KEYREL.PRED _i-dishes-senses_n_rel ].
+   SYNSEM.LKEYS.KEYREL.PRED _i-tools-temper_n_rel ].
 kliw_i := poss-cmn-3pm-3sm-noun-lex &
   [ STEM < "kliw" >,
-   SYNSEM.LKEYS.KEYREL.PRED _i-dishes-senses_n_rel ].
+   SYNSEM.LKEYS.KEYREL.PRED _i-tools-temper_n_rel ].
 klih_i := poss-cmn-3pm-3sf-noun-lex &
   [ STEM < "klih" >,
-   SYNSEM.LKEYS.KEYREL.PRED _i-dishes-senses_n_rel ].   
+   SYNSEM.LKEYS.KEYREL.PRED _i-tools-temper_n_rel ].   
     
 
 ;LHS 15/02/15: MWE order constraints (V+NPpossessive+PP)
@@ -315,6 +362,15 @@ nebr := arg2_unacc_past_le &
   [ STEM < "nebr" >, 
     SYNSEM [ LOCAL.CAT [ HEAD.CNCRD png-3sm ],
 	     LKEYS.KEYREL.PRED _nebr_v_rel ] ].
+;;LHS 110915: expanding subj1-subj2 fix: A present tense entry, for VP beinoni (complement for object to subject raising verbs).
+nebr_1 := arg2_unacc_present_le &
+  [ STEM < "nebr" >, 
+    SYNSEM [ LOCAL.CAT [ HEAD.CNCRD png-sm ],
+	     LKEYS.KEYREL.PRED _nebr_v_rel ] ].	 
+nebrt := arg2_unacc_present_le &
+  [ STEM < "nebrt" >, 
+    SYNSEM [ LOCAL.CAT [ HEAD.CNCRD png-sf ],
+	     LKEYS.KEYREL.PRED _nebr_v_rel ] ].		 
 nebrh := arg2_unacc_past_le &
   [ STEM < "nebrh" >, 
     SYNSEM [ LOCAL.CAT [ HEAD.CNCRD png-3sf ],
@@ -323,6 +379,7 @@ nebrw := arg2_unacc_past_le &
   [ STEM < "nebrw" >, 
     SYNSEM [ LOCAL.CAT [ HEAD.CNCRD png-3p ],
 	     LKEYS.KEYREL.PRED _nebr_v_rel ] ].
+	     
 hakil := arg13-123_n_n_past_le &
   [ STEM < "hakil" >,
     SYNSEM [ LOCAL.CAT.HEAD.CNCRD png-3sm,
@@ -686,6 +743,12 @@ xeb := arg1-12-16_c_p_past_le &
     SYNSEM [ LOCAL [ CAT [ HEAD.CNCRD png-3sm,
 			   VAL.PPSORT.DEP6-P _yl_p_rel ] ],
 	           LKEYS.KEYREL.PRED _xeb_v_rel ] ].
+xee := arg12-13_pc_p_past_le &
+  [ STEM < "xee" >,
+    SYNSEM [ LOCAL [ CAT [ HEAD.CNCRD png-3sm,
+			   VAL.PPSORT.DEP2-P l-m-p ] ],
+	           LKEYS.KEYREL.PRED _xee_v_rel ] ].
+	           	           
 xebh := arg1-12-16_c_p_past_le &
   [ STEM < "xebh" >,
     SYNSEM [ LOCAL [ CAT [ HEAD.CNCRD png-3sf,
@@ -776,6 +839,11 @@ qnth := arg12-123-125_n_p_p_past_le &
 	     
 ;Nurit 26/10
 ;;; RAISING VERBS ;;;;
+;NM 3/9/15: subj1-subj2 fix: handle subject raising of arg1 or arg2 subjects
+amwr_r := arg12_v_subj-raising_present_le & 
+ [ STEM < "amwr" >,
+    SYNSEM [ LOCAL.CAT.HEAD.CNCRD png-3sm,
+                    LKEYS.KEYREL.PRED _amwr_v_rel ] ].
 
 ;yewi_r := arg12_v_subj-raising_present_le & 
 ; [ STEM < "yewi" >,
@@ -1122,7 +1190,7 @@ hwa_pron := arg12-14_pron-cop_present_le &
   [ STEM < "hwa" >, 
     SYNSEM [ LOCAL.CAT.HEAD.CNCRD png-3sm ] ].
 
-hia := arg12-14_pron-cop_present_le &
+hia_pron := arg12-14_pron-cop_present_le &
   [ STEM < "hia" >, 
     SYNSEM [ LOCAL.CAT.HEAD.CNCRD png-3sf ] ].
 
@@ -1340,6 +1408,11 @@ lmcwa := arg12_nc_infinitive_le &
 lhdq := arg12_n_infinitive_le &
   [ STEM < "lhdq" >, 
     SYNSEM [ LKEYS.KEYREL.PRED _hidq_v_rel ] ].
+    
+;NM 3/9/15: subj1-subj2 fix: add type for arg2 subject infinitive
+lhebr := arg2_unacc_infinitive_le &
+  [ STEM < "lhebr" >, 
+    SYNSEM [ LKEYS.KEYREL.PRED _nebr_v_rel ] ].
 
 mh_v_inf := vp-inf-qpart-lex-item & 
   [ STEM < "mh" >,
@@ -1444,26 +1517,26 @@ vmnh_i := arg125_ni_pi_xarg12_past_le &
 ica_i := arg15_pi_xarg15_past_le &	     
   [ STEM < "ica" >,
     SYNSEM [ LOCAL [ CAT [ HEAD.CNCRD png-3sm,
-                           VAL.PPSORT.DEP5-P _m_from_dishes_ip_rel ] ],
+                           VAL.PPSORT.DEP5-P _m_from_tools_ip_rel ] ],
 	         LKEYS.KEYREL.PRED _i-leave-lose_v_rel ] ].
 
 icah_i := arg15_pi_xarg15_past_le &	     
   [ STEM < "icah" >,
     SYNSEM [ LOCAL [ CAT [ HEAD.CNCRD png-3sf,
-                           VAL.PPSORT.DEP5-P _m_from_dishes_ip_rel ] ],
+                           VAL.PPSORT.DEP5-P _m_from_tools_ip_rel ] ],
 	         LKEYS.KEYREL.PRED _i-leave-lose_v_rel ] ].
 
 ;LHS 15/02/15: MWE order constraints (V+NP+PP/PPpossessive)
 hwcia_i := arg125_n_pi_xarg25_past_le & 
   [ STEM < "hwcia" >,
     SYNSEM [ LOCAL [ CAT [ HEAD.CNCRD png-3sm,
-    			           VAL.PPSORT.DEP5-P _m_from_dishes_ip_rel ] ],
+    			           VAL.PPSORT.DEP5-P _m_from_tools_ip_rel ] ],
 	         LKEYS.KEYREL.PRED _i-cause_leave-lose_v_rel ] ].
 
 hwciah_i := arg125_n_pi_xarg25_past_le & 
   [ STEM < "hwciah" >,
     SYNSEM [ LOCAL [ CAT [ HEAD.CNCRD png-3sf,
-    			           VAL.PPSORT.DEP5-P _m_from_dishes_ip_rel ] ],
+    			           VAL.PPSORT.DEP5-P _m_from_tools_ip_rel ] ],
 	         LKEYS.KEYREL.PRED _i-cause_leave-lose_v_rel ] ].
 
 ;=============================================================================
@@ -1581,7 +1654,7 @@ mti := advp-qpart-lex-item &
 ;================================= PREPOSITIONS ===================================
 ;==================================================================================
 ;LHS PPSORT:
-yl := basic-nomod-adposition-lex-np &
+yl_p := basic-nomod-adposition-lex-np &
   [ STEM < "yl" >,
     SYNSEM.LKEYS.KEYREL.PRED _yl_p_rel ].
 l := basic-nomod-adposition-lex-np &
@@ -1597,10 +1670,10 @@ m := basic-nomod-adposition-lex-np &
 m_advp := basic-nomod-adposition-lex-advp &
   [ STEM < "m" >,
     SYNSEM.LKEYS.KEYREL.PRED _m_p_rel ].    
-ym := basic-nomod-adposition-lex-np &
+ym_p := basic-nomod-adposition-lex-np &
   [ STEM < "ym" >,
     SYNSEM.LKEYS.KEYREL.PRED _ym_p_rel ].
-al := basic-nomod-adposition-lex-np &
+al_p := basic-nomod-adposition-lex-np &
   [ STEM < "al" >,
     SYNSEM.LKEYS.KEYREL.PRED _al_p_rel ].
 ;SUBJ-ARG: to enable by phrases, for now, yl idi as one word
@@ -1618,10 +1691,10 @@ m_i_from_tree := basic-nomod-adposition-lex-np-i &
              LKEYS.KEYREL.PRED _m_from_tree_ip_rel ] ].                            
 
 ;POSS Nurit 12/2/15
-m_i_from_dishes := poss-raise-adposition-lex-np-i &
+m_i_from_tools := poss-raise-adposition-lex-np-i &
   [ STEM < "m" >,
-    SYNSEM [ LOCAL.CAT.VAL.DEP2.DEP.LOCAL.CONT.HOOK.TOPREL.PRED _i-dishes-senses_n_rel,
-             LKEYS.KEYREL.PRED _m_from_dishes_ip_rel ] ].  
+    SYNSEM [ LOCAL.CAT.VAL.DEP2.DEP.LOCAL.CONT.HOOK.TOPREL.PRED _i-tools-temper_n_rel,
+             LKEYS.KEYREL.PRED _m_from_tools_ip_rel ] ].  
 
 ;LHS 15/02/15: MWE order constraints (V+NPpossessive+PP) 
 b_i_in_sand := basic-nomod-adposition-lex-np-i &
@@ -1633,7 +1706,7 @@ b_i_in_sand := basic-nomod-adposition-lex-np-i &
 ;================================= FUNCTIONAL ================================
 ;=============================================================================
 
-at := acc-marking-lex &
+at_cm := acc-marking-lex &
   [ STEM < "at" > ].
 
 e := nmc-complementizer-lex-item &
@@ -1643,7 +1716,7 @@ mh_c := cp-qpart-lex-item &
   [ STEM < "mh" >,
    SYNSEM.LKEYS.KEYREL.PRED _mh_c_rel ].
 
-ham := qpart-yes-no-lex-item &
+ham_q := qpart-yes-no-lex-item &
   [ STEM < "ham" >,
     SYNSEM.LKEYS.KEYREL.PRED _ham_rel ].
 
