@@ -106,23 +106,26 @@ class nounRowConverter(rowConverter):
     # takes as input the list of names used so far, and whether to
     # print words with punctuation in them
     @staticmethod
-    def printAllNouns(lexicon, wantPunctuation, fileName):
+    #def printAllNouns(lexicon, wantPunctuation, fileName):
+    def printAllNouns(lexicon, fileName):#LHS: no need to check for punctuation here anymore 
         fout = open(fileName, 'w')
 
         for key, valueList in nounRowConverter.allNouns.iteritems():
             # if the word is a special case, just print it to the file
             if key[0] == "special_word":
-                if not wantPunctuation:
-                    fout.write(key[1])
-                    fout.write('\n')
+                #if not wantPunctuation:#LHS: not needed anymore
+                    #fout.write(key[1])
+                    #fout.write('\n')
+                fout.write(key[1])
+                fout.write('\n')
                 continue
 
 
-            # if there is punctuation when we don't want it or vice-versa,
+            '''# if there is punctuation when we don't want it or vice-versa,
             # don't count it
             has_punct = containsPunct(key[0], key[1])
             if not wantPunctuation and has_punct or wantPunctuation and not has_punct:
-                continue
+                continue'''#LHS: no longer needed
 
             # merge each of the pngs to make them as general as possible
             valueList = mergePNGs(valueList)
@@ -151,8 +154,14 @@ class nounRowConverter(rowConverter):
         (definiteness, nounType) = noun.definitenessNounType(int(r[pos_c]), \
                         r[suffixStatus_c], r[png_c], r[definiteness_c])
         #keyTuple = (self.getStem(), self.getPred(), nounType, definiteness)
+
+        #LHS: get rid of illegal punctuation
+        stem = self.getStem()
+        pred = self.getPred()
+        (stem, pred) = replacePunct(stem, pred)
+        
         #LHS:
-        keyTuple = (self.getStem(), self.getPred(), nounType, definiteness, self.getLexicalPointer())
+        keyTuple = (stem, pred, nounType, definiteness, self.getLexicalPointer())
         (person, number, gender) = noun.png(r[person_c], r[number_c], r[gender_c])
         (poss_person, poss_number, poss_gender) = noun.possessorPNG(r[png_c])
         pngData = (person, number, gender, poss_person, poss_number, poss_gender)
@@ -161,7 +170,7 @@ class nounRowConverter(rowConverter):
         # insert it into the dictionary
         valueTuple = nounRowConverter.allNouns.get(keyTuple)
         
-        preexistingKeyTuple = (self.getStem(), self.getPred(), nounType, definiteness, DEFAULT_LEXICAL_POINTER)##LHS - the key is unchanged, except the lexical pointer
+        preexistingKeyTuple = (stem, pred, nounType, definiteness, DEFAULT_LEXICAL_POINTER)##LHS - the key is unchanged, except the lexical pointer
         preexistingValueTuple = nounRowConverter.allNouns.get(preexistingKeyTuple)##LHS
 
         #LHS: if printing is needed for debugging: 

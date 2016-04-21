@@ -178,6 +178,7 @@ class verbRowConverter(rowConverter):
             # 	(person, number, gender,[complements], [ppsorts])            
 
             #keyTup = (stem, pred, tense, control, subject_control)
+
             keyTup = (stem, pred, tense, control, subject_control, DEFAULT_LEXICAL_POINTER)#LHS - see above
 
             verbRowConverter.allVerbs.update({keyTup: [(person, number, gender)]})
@@ -210,22 +211,25 @@ class verbRowConverter(rowConverter):
     # takes as input the list of names used so far, and whether to
     # print words with punctuation in them
     @staticmethod
-    def printAllVerbs(lexicon, wantPunctuation, fileName):
+    #def printAllVerbs(lexicon, wantPunctuation, fileName):
+    def printAllVerbs(lexicon, fileName):#LHS: no need to check for punctuation here anymore
         fout = open(fileName, 'w')
 
         for key, valueList in verbRowConverter.allVerbs.iteritems():
             # if the word is a special case, just print it to the file
             if key[2] == "special_word":
-                if not wantPunctuation:
-                    fout.write(key[1])
-                    fout.write('\n')
+                #if not wantPunctuation:#LHS: not needed anymore
+                    #fout.write(key[1])
+                    #fout.write('\n')
+                fout.write(key[1])
+                fout.write('\n')
                 continue
 
-            # if there is punctuation when we don't want it or vice-versa,
+            '''# if there is punctuation when we don't want it or vice-versa,
             # don't count it
             has_punct = containsPunct(key[0], key[1])
             if not wantPunctuation and has_punct or wantPunctuation and not has_punct:
-                continue
+                continue'''#LHS: no longer needed
 
             # merge each of the png's to make them as general as possible
             valueList = mergePNG(valueList)
@@ -402,14 +406,20 @@ class verbRowConverter(rowConverter):
         # (stem, pred, tense, control, subject_control)->
         # 	(person, number, gender, complements, [ppsorts])
         #keyTuple = (self.getStem(), self.getPred(), tense, control, subject_control)
-        keyTuple = (self.getStem(), self.getPred(), tense, control, subject_control, self.getLexicalPointer())
+
+        #LHS: get rid of illegal punctuation in pred or stem
+        stem = self.getStem()
+        pred = self.getPred()
+        (stem, pred) = replacePunct(stem, pred)
+
+        keyTuple = (stem, pred, tense, control, subject_control, self.getLexicalPointer())
         pngTuple = (p, n, g)
 
         # if there is nothing with this stem, pred and type seen yet,
         # insert it into the dictionary
         valueTuple = verbRowConverter.allVerbs.get(keyTuple)
 
-        preexistingKeyTuple = (self.getStem(), self.getPred(), tense, control, subject_control, DEFAULT_LEXICAL_POINTER)##LHS - the key is unchanged, except the lexical pointer
+        preexistingKeyTuple = (stem, pred, tense, control, subject_control, DEFAULT_LEXICAL_POINTER)##LHS - the key is unchanged, except the lexical pointer
         preexistingValueTuple = verbRowConverter.allVerbs.get(preexistingKeyTuple)##LHS
         
         if valueTuple is None:

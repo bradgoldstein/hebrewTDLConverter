@@ -65,24 +65,31 @@ if __name__ == '__main__':
         print(str(k) + ' -> ' + str(verbRowConverter.allVerbs[k]))
     #LHS: print out all the adverbs
     for item in advRowConverter.allAdvs:
-        print(str(item))'''        
+        print(str(item))
+    verbCompKeys = verbRowConverter.verbsComplements.keys()#LHS test
+    for k in verbCompKeys:#LHS test
+        print(str(k) + ' -> ' + str(verbRowConverter.verbsComplements[k]))#LHS test'''
 
     print "printing noun lexicon..."
-    nounRowConverter.printAllNouns(lexicon_c, False, "lexica/lexicon_noun.tdl")
-    print "printing noun lexicon with punctuation..."
-    nounRowConverter.printAllNouns(lexicon_c, True, "lexica/lexicon_noun_punct.tdl")
+    nounRowConverter.printAllNouns(lexicon_c, "lexica/lexicon_noun.tdl")
+    #nounRowConverter.printAllNouns(lexicon_c, False, "lexica/lexicon_noun.tdl")
+    #print "printing noun lexicon with punctuation..."
+    #nounRowConverter.printAllNouns(lexicon_c, True, "lexica/lexicon_noun_punct.tdl")
     print "printing adjective lexicon..."
-    adjRowConverter.printAllAdjs(lexicon_c, False, "lexica/lexicon_adj.tdl")
-    print "printing adjective lexicon with punctuation..."
-    adjRowConverter.printAllAdjs(lexicon_c, True, "lexica/lexicon_adj_punct.tdl")
+    adjRowConverter.printAllAdjs(lexicon_c, "lexica/lexicon_adj.tdl")
+    #adjRowConverter.printAllAdjs(lexicon_c, False, "lexica/lexicon_adj.tdl")
+    #print "printing adjective lexicon with punctuation..."
+    #adjRowConverter.printAllAdjs(lexicon_c, True, "lexica/lexicon_adj_punct.tdl")
     print "printing adverb lexicon..."
-    advRowConverter.printAllAdvs(lexicon_c, False, "lexica/lexicon_adv.tdl")
-    print "printing adverb lexicon with punctuation..."
-    advRowConverter.printAllAdvs(lexicon_c, True, "lexica/lexicon_adv_punct.tdl")
+    advRowConverter.printAllAdvs(lexicon_c, "lexica/lexicon_adv.tdl")
+    #advRowConverter.printAllAdvs(lexicon_c, False, "lexica/lexicon_adv.tdl")
+    #print "printing adverb lexicon with punctuation..."
+    #advRowConverter.printAllAdvs(lexicon_c, True, "lexica/lexicon_adv_punct.tdl")
     print "printing verb lexicon..."
-    verbRowConverter.printAllVerbs(lexicon_c, False, "lexica/lexicon_verb.tdl")
-    print "printing verb lexicon with punctuation..."
-    verbRowConverter.printAllVerbs(lexicon_c, True, "lexica/lexicon_verb_punct.tdl")
+    verbRowConverter.printAllVerbs(lexicon_c, "lexica/lexicon_verb.tdl")
+    #verbRowConverter.printAllVerbs(lexicon_c, False, "lexica/lexicon_verb.tdl")
+    #print "printing verb lexicon with punctuation..."
+    #verbRowConverter.printAllVerbs(lexicon_c, True, "lexica/lexicon_verb_punct.tdl")
 
     print "printing noun types..."
     nounRowConverter.printTypes("lexica/noun_types.txt")

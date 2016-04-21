@@ -31,6 +31,17 @@ def containsPunct(stem, lemma):
     else:
         return False
 
+# LHS: replaces illegal punctuation in stem or pred (but not in the original data structure, just in the passed strings)
+def replacePunct(stem, pred):
+    if containsPunct(stem, pred):
+        stem = stem.replace("'", '1')
+        stem = stem.replace('"', '2')
+        stem = stem.replace('.', '0')
+        pred = pred.replace("'", '1')
+        pred = pred.replace('"', '2')
+        pred = pred.replace('.', '0')
+    return (stem, pred)
+
 # replaces all instances of ' ' in a string with '_'
 def replaceSpaceWithUnderscore(word):
     return word.replace(' ', '_')

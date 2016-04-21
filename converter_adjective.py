@@ -51,22 +51,25 @@ class adjRowConverter(rowConverter):
 	# takes as input the list of names used so far, and whether to
 	# print words with puctuation in them
 	@staticmethod
-	def printAllAdjs(lexicon, wantPunctuation, fileName):
+	#def printAllAdjs(lexicon, wantPunctuation, fileName):
+	def printAllAdjs(lexicon, fileName):#LHS: no need to check for punctuation here anymore
 		fout = open(fileName, 'w')
 
 		for key, value in adjRowConverter.allAdjs.iteritems():
 			# if the word is a special exception, just print it out
 			if key[0] == "special_word":
-				if not wantPunctuation:
-					fout.write(key[1])
-					fout.write('\n')
+				#if not wantPunctuation:#LHS: not needed anymore
+					#fout.write(key[1])
+					#fout.write('\n')
+				fout.write(key[1])
+				fout.write('\n')
 				continue
 
-			# if there is punctuation when we don't want it or vice-versa,
+			'''# if there is punctuation when we don't want it or vice-versa,
 			# dont count it
 			has_punct = containsPunct(key[0], key[1])
 			if not wantPunctuation and has_punct or wantPunctuation and not has_punct:
-				continue
+				continue'''#LHS: no longer needed
 
 			fout.write(adjRowConverter.rowToTDL(key, value, lexicon))
 			fout.write('\n')
@@ -85,13 +88,19 @@ class adjRowConverter(rowConverter):
 		# get the key for the dictionary, and the value (gender)
 		#keyTuple = (self.getStem(), self.getPred(), \
 			#adj.definiteness(r[definiteness_c]), adj.number(r[number_c]))
-		keyTuple = (self.getStem(), self.getPred(), \
+
+                #LHS: get rid of illegal punctuation in pred or stem
+		stem = self.getStem()
+		pred = self.getPred()
+		(stem, pred) = replacePunct(stem, pred)
+                		
+		keyTuple = (stem, pred, \
 			adj.definiteness(r[definiteness_c]), adj.number(r[number_c]), self.getLexicalPointer())#LHS
 		gender = adj.gender(r[gender_c], r[transliteration_c])
 		# find the already existant genders associated with this key
 		genderList = adjRowConverter.allAdjs.get(keyTuple)
 		
-		preexistingKeyTuple = (self.getStem(), self.getPred(), \
+		preexistingKeyTuple = (stem, pred, \
 			adj.definiteness(r[definiteness_c]), adj.number(r[number_c]), DEFAULT_LEXICAL_POINTER)##LHS - the key is unchanged, except the lexical pointer
 		preexistingGenderList = adjRowConverter.allAdjs.get(preexistingKeyTuple)##LHS
 
