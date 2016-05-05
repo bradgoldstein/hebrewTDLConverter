@@ -31,7 +31,7 @@ class verbRowConverter(rowConverter):
     #   {arguments->([realizations], [PPSORTS])} of those arguments
     verbsComplements = {}
 
-    #LHS:
+    #LHS (fixing bug #24):
     # Special verbs, based on preexisting special verbs from our lexicon. This is a small group, so a copy of also saved
     # separately, so that they can be queried more quickly.
     # The structure is the same as for allVerbs, but as far as the key goes, the entire structure is under "pred", there is "special_word" for "tense",
@@ -80,6 +80,8 @@ class verbRowConverter(rowConverter):
             # assume the word is subject control
             subject_control = True
             # if there is a _c ending, the word is a control word
+            # LHS: note that for object control words, the trailing c only appears if there is a non-control counterpart (therefore, most object control cases
+            # are captured in the next elif, and not here
             if 'c' in title:
                 control = True
                 # if the word is object-control, mark is as so
@@ -99,7 +101,7 @@ class verbRowConverter(rowConverter):
                  'unacc' in wordType:
                 addToLexicon(stem, lexicon)
                 verbRowConverter.allVerbs.update({specialKey: [('', '', '')]})
-                verbRowConverter.specialVerbs.update({specialKey: [('', '', '')]})#LHS
+                verbRowConverter.specialVerbs.update({specialKey: [('', '', '')]})#LHS (bug #24)
                 verbRowConverter.verbsComplements.update({specialKey: ({})})
                 
                 continue
@@ -123,7 +125,7 @@ class verbRowConverter(rowConverter):
             if not pred_check:
                 addToLexicon(stem, lexicon)
                 verbRowConverter.allVerbs.update({specialKey: [('', '', '')]})
-                verbRowConverter.specialVerbs.update({specialKey: [('', '', '')]})#LHS
+                verbRowConverter.specialVerbs.update({specialKey: [('', '', '')]})#LHS (bug #24)
                 verbRowConverter.verbsComplements.update({specialKey: ({})})
                 continue
 
@@ -150,7 +152,7 @@ class verbRowConverter(rowConverter):
             if control and subject_control and complement != '2_v':
                 addToLexicon(stem + '_c', lexicon)
                 verbRowConverter.allVerbs.update({specialKey: [('', '', '')]})
-                verbRowConverter.specialVerbs.update({specialKey: [('', '', '')]})#LHS
+                verbRowConverter.specialVerbs.update({specialKey: [('', '', '')]})#LHS (bug #24)
                 verbRowConverter.verbsComplements.update({specialKey: ({})})
                 continue
 
@@ -160,7 +162,7 @@ class verbRowConverter(rowConverter):
             if 'j' in complement:
                 addToLexicon(stem, lexicon)
                 verbRowConverter.allVerbs.update({specialKey: [('', '', '')]})
-                verbRowConverter.specialVerbs.update({specialKey: [('', '', '')]})#LHS
+                verbRowConverter.specialVerbs.update({specialKey: [('', '', '')]})#LHS (bug #24)
                 verbRowConverter.verbsComplements.update({specialKey: ({})})
                 continue
 
@@ -212,7 +214,7 @@ class verbRowConverter(rowConverter):
     # print words with punctuation in them
     @staticmethod
     #def printAllVerbs(lexicon, wantPunctuation, fileName):
-    def printAllVerbs(lexicon, fileName):#LHS: no need to check for punctuation here anymore
+    def printAllVerbs(lexicon, fileName):#LHS: no need to check for punctuation here anymore (fixed bug #27)
         fout = open(fileName, 'w')
 
         for key, valueList in verbRowConverter.allVerbs.iteritems():
@@ -281,8 +283,10 @@ class verbRowConverter(rowConverter):
         # If None is the only complement, the word is _basic
         if "None" in complements and len(complements) == 1:
             typesPPSORTs.append(("_basic", []))
-
         else:
+            #LHS: fixing bug #29 - verbs that only have a subject control entry but should have an intransitive alternate, should get the alternate:
+            if "None" in complements and "inf" in complements and len(complements) == 2:
+                typesPPSORTs.append(("_basic", []))
             # remove "inf" from the complements
             try:
                complements.remove("inf")
@@ -407,7 +411,7 @@ class verbRowConverter(rowConverter):
         # 	(person, number, gender, complements, [ppsorts])
         #keyTuple = (self.getStem(), self.getPred(), tense, control, subject_control)
 
-        #LHS: get rid of illegal punctuation in pred or stem
+        #LHS: get rid of illegal punctuation in pred or stem (bug #27)
         stem = self.getStem()
         pred = self.getPred()
         (stem, pred) = replacePunct(stem, pred)
@@ -421,11 +425,27 @@ class verbRowConverter(rowConverter):
 
         preexistingKeyTuple = (stem, pred, tense, control, subject_control, DEFAULT_LEXICAL_POINTER)##LHS - the key is unchanged, except the lexical pointer
         preexistingValueTuple = verbRowConverter.allVerbs.get(preexistingKeyTuple)##LHS
+
+        ##LHS fixing bug #30:
+        shouldHaveControlEntry = False
+        if not control and subject_control:#i.e., the input entry doesn't have a control possibility
+            alternateCntrlKeyTuple = (stem, pred, tense, True, subject_control, DEFAULT_LEXICAL_POINTER)#create an entry with a subject control possibility
+        elif control and subject_control:#i.e., the input entry has a subject control possibility
+            alternateCntrlKeyTuple = (stem, pred, tense, False, subject_control, DEFAULT_LEXICAL_POINTER)#create an entry without a control possibility
+            if verbRowConverter.allVerbs.get(alternateCntrlKeyTuple):#If this is true, that means that the input entry has a subject control possibility, whereas
+                #there's a pre-existing entry that is identical but DOESN'T have a subject control possibility.
+                shouldHaveControlEntry = True #We mark this case
+
+        alternateCntrlValuetuple = verbRowConverter.allVerbs.get(alternateCntrlKeyTuple)
+        
         
         if valueTuple is None:
-            if preexistingValueTuple is None:#LHS - added this-subcondition. We only want the entry to be added if it doesn't already appear,
+            if preexistingValueTuple is None: #LHS - added this-subcondition. We only want the entry to be added if it doesn't already appear,
                 #including if there's a similar entry in the pre-existing lexicon
-                if self.noSpecialCounterpartExists(preexistingKeyTuple):#LHS: also make sure that there's no special word entry for this STRING&PRED combination
+                if alternateCntrlValuetuple is None:#Bug #30
+                    if self.noSpecialCounterpartExists(preexistingKeyTuple):#LHS: also make sure that there's no special word entry for this STRING&PRED combination
+                        verbRowConverter.allVerbs.update({keyTuple:[pngTuple]})
+                elif alternateCntrlValuetuple and shouldHaveControlEntry:#i.e., it's the specific case described above, so we want it to be included as well.
                     verbRowConverter.allVerbs.update({keyTuple:[pngTuple]})
 
         # otherwise keep track of all the png values associated with key
@@ -433,10 +453,16 @@ class verbRowConverter(rowConverter):
             valueTuple.append(pngTuple)
 
         # keep track of the args and realizations separately for printing
-        verbRowConverter.verbsComplements.update({keyTuple: (complements, typesPPSORTs)})
+        if not shouldHaveControlEntry:#LHS for bug #30
+            verbRowConverter.verbsComplements.update({keyTuple: (complements, typesPPSORTs)})
+        else:
+            verbRowConverter.verbsComplements.update({keyTuple: ([], [])})#because we only want the subject control entry in this case
+            #(which is captured in the True, True part of the keyTuple); As the other entry/ies for this string already pre-exist.
+            
+
 
     #LHS: makes sure that there is no pre-existing special word that has the same STEM and PRED values as this candidate entry; This requires going over all
-    #forty something special verbs, because of the way they are stored (with their entire structure under PRED).
+    #forty something special verbs, because of the way they are stored (with their entire structure under PRED). Fixing bug #24.
     def noSpecialCounterpartExists(self, preexistingKeyTuple):
         specialVerbsKeys = verbRowConverter.specialVerbs.keys()
         preexistingStem = preexistingKeyTuple[0]
@@ -493,6 +519,7 @@ class verbRowConverter(rowConverter):
         else:
             return False
 
+
     # returns the tdl formatted string given key, value tuples and complement dictionary
     # in the allVerbs dictionary
     @staticmethod
@@ -502,59 +529,49 @@ class verbRowConverter(rowConverter):
         tdls = []
 
         comps_list = complement[1]
-        i = 0#LHS: add a counter to mark the first go through, so as to not create multiple control entries unneccessarily
-        for c in comps_list:#LHS: loop through all possible entries (complement[1] actually stores possible entries)
 
+        # LHS: fixing bug #28 - actually, dealing with control verbs should be outside of the loop, because for verbs that only have a control entry (e.g. htqeh),
+        # the loop isn't entered to at all (as they have an empty list as their complement), and for verbs that have an additional entry, this is only needed once anyway.
 
-            # object control verbs
-            #if key[3] and not key[4]:
-            if key[3] and not key[4] and i == 0:#LHS (only if this is the first go through)
-                #type = c[1][0][0]
-                type = c[0]#LHS??
-                if png == '':
-                    png_text = ''
-                else:
-                    png_text = "LOCAL.CAT.HEAD.CNCRD png-" + png + ",\n     "
-
-                verb_name = addToLexicon(replaceSpaceWithUnderscore(key[0] + '_c'), lexicon)
-                tdls.append(''.join((verb_name, " := arg1", type, "_obj-cntrl_", key[2], "_le &\n",
+        # object control verbs
+        if key[3] and not key[4]:
+            type = complement[1][0][0]
+            if png == '':
+                png_text = ''
+            else:
+                png_text = "LOCAL.CAT.HEAD.CNCRD png-" + png + ",\n     "
+            verb_name = addToLexicon(replaceSpaceWithUnderscore(key[0] + '_c'), lexicon)
+            tdls.append(''.join((verb_name, " := arg1", type, "_obj-cntrl_", key[2], "_le &\n",
                                      "  [ STEM < \"", breakUpWordWithComma(key[0]),  "\" >,\n",
                                      "   SYNSEM [ ", png_text,
                                      "LKEYS.KEYREL.PRED _",key[1], "_v_rel ] ].\n")))
+            return tdls
 
-                return tdls
-
-            # subject control verbs
-            #elif key[3]:
-            elif key[3] and key[4] and i == 0:#LHS (only if this is the first go through)
-                verb_name = addToLexicon(replaceSpaceWithUnderscore(key[0] + '_c'), lexicon)
-                if png == '':
-                    png_text, last_bracket = "   SYNSEM.", ""
-                else:
-                    png_text, last_bracket = "   SYNSEM [ LOCAL.CAT [ HEAD.CNCRD png-" + png + " ],\n" + "    ", " ]"
-
-                tdls.append(''.join((verb_name, " := arg12_v_subj-cntrl_", key[2],
+        # subject control verbs
+        elif key[3]:
+            verb_name = addToLexicon(replaceSpaceWithUnderscore(key[0] + '_c'), lexicon)
+            if png == '':
+                png_text, last_bracket = "   SYNSEM.", ""
+            else:
+                png_text, last_bracket = "   SYNSEM [ LOCAL.CAT [ HEAD.CNCRD png-" + png + " ],\n" + "    ", " ]"
+            tdls.append(''.join((verb_name, " := arg12_v_subj-cntrl_", key[2],
                                      "_le &\n  [ STEM < \"",
                                     breakUpWordWithComma(key[0]),
                                      "\" >,\n", png_text, "LKEYS.KEYREL.PRED _", key[1], "_v_rel ]", last_bracket, ".\n")))
 
-            # ensure that invalid types are not written for pre-existing verbs with subject control
-            try:
-                #if key[3] and key[4] and c[1][0][0] == '2_v':
-                #if key[3] and key[4] and c[0] == '2_v':
-                if key[3] and key[4] and i == 0 and c[0] == '2_v':#LHS (only if this is the first go through)
-                    return tdls
-            except:
-                pass
-
-
-            i += 1#LHS
-
-            # if there are no complements, all TDL values have been found.
-            #if len(c[1]) is 0:
-            if len(c) is 0:
+        # ensure that invalid types are not written for pre-existing verbs with subject control
+        try:
+            if key[3] and key[4] and complement[1][0][0] == '2_v':
                 return tdls
+        except:
+            pass
 
+        if len(complement[1]) is 0:
+            return tdls
+            
+        #LHS: fixing bug #19 (enabling more than one lexical entry per verb)
+        for c in comps_list:#LHS: loop through all possible entries (complement[1] actually stores possible entries)
+ 
             type = c[0]
             ppsorts = c[1]            
 
