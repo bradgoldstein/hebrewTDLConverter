@@ -194,7 +194,8 @@ class verbRowConverter(rowConverter):
     # load the pmi dictionary before adding words from dinflections.csv
     # so that the file does not need to be repeatedly queried
     @staticmethod
-    def loadPMIDictionary():
+    def loadPMIDictionary():#LHS: a dictionary with the lexical pointer as the key, and the complements as the value (for debugging)
+        pmidic = {}
         pmi_f = openCSV("lexica/PMI_Dictionary.txt", '\t')
 
         # skip the header row
@@ -208,6 +209,28 @@ class verbRowConverter(rowConverter):
                 complement = utf8ToTransliteration(complement)
 
             verbRowConverter.pmi[int(row[1])].append(complement)
+
+            lp = row[1]
+            if lp in pmidic:#there's already an entry
+                pmidic[lp].append(complement)
+            else:
+                pmidic[lp] = [complement]
+        return pmidic
+##    @staticmethod
+##    def loadPMIDictionary():#LHS: original
+##        pmi_f = openCSV("lexica/PMI_Dictionary.txt", '\t')
+##
+##        # skip the header row
+##        iterRows = iter(pmi_f)
+##        next(iterRows)
+##
+##        # get all of the complements for each lexical pointer
+##        for row in iterRows:
+##            complement = row[7]
+##            if complement not in ["None", "clause", "inf"]:
+##                complement = utf8ToTransliteration(complement)
+##
+##            verbRowConverter.pmi[int(row[1])].append(complement)
 
     # print all the verbs from the dictionary in tdl format
     # takes as input the list of names used so far, and whether to
@@ -362,14 +385,49 @@ class verbRowConverter(rowConverter):
             #LHS: correction - 13 is also a possible combination (issue #20 and therefore also #7)
             # Exception: verb can take "at" and "l" (but not "m")
             #LHS: fixing issue #22 (uncovered in issue #18) - if there's a none complement alternate, include it.
-            if not none_complement:
-                addToTypesPPSORTs(["at", "l"],
-                              "2-13-123_n_p", [],
-                              complements, typesPPSORTs)
-            else:
-                addToTypesPPSORTs(["at", "l"],
-                              "-12-13-123_n_p", [],
-                              complements, typesPPSORTs)                
+            #LHS: fixing issue #31 - if a clause is also possible for arg2
+            #LHS: fixing issue #33 - Different cases for when "al" is possible as arg3, because if so, it should be removed from the complements list
+            #LHS: fixing issue #32 - if there's an "yl", we want the wider combination, not this (but, we still have a problem with combined complements for arg2)
+            if not none_complement and "yl" not in complements:
+                if not "al" in complements:
+                    if not "clause" in complements:
+                        addToTypesPPSORTs(["at", "l"],
+                                      "2-13-123_n_p", [],
+                                      complements, typesPPSORTs)
+                    else:
+                        addToTypesPPSORTs(["at", "clause", "l"],
+                                      "2-13-123_nc_p", [],
+                                      complements, typesPPSORTs)
+                else:
+                    if not "clause" in complements:
+                        addToTypesPPSORTs(["at", "l", "al"],
+                                      "2-13-123_n_p", [],
+                                      complements, typesPPSORTs)
+                    else:
+                        addToTypesPPSORTs(["at", "clause", "l", "al"],
+                                      "2-13-123_nc_p", [],
+                                      complements, typesPPSORTs)
+                    
+            elif none_complement and "yl" not in complements:
+                if not "al" in complements:
+                    if not "clause" in complements:
+                        addToTypesPPSORTs(["at", "l"],
+                                      "-12-13-123_n_p", [],
+                                      complements, typesPPSORTs)
+                    else:
+                        addToTypesPPSORTs(["at", "clause", "l"],
+                                      "-12-13-123_nc_p", [],
+                                      complements, typesPPSORTs)
+                else:
+                    if not "clause" in complements:
+                        addToTypesPPSORTs(["at", "l", "al"],
+                                      "-12-13-123_n_p", [],
+                                      complements, typesPPSORTs)
+                    else:
+                        addToTypesPPSORTs(["at", "clause", "l", "al"],
+                                      "-12-13-123_nc_p", [],
+                                      complements, typesPPSORTs)                    
+                        
 
             #LHS: added a case for when "m", "ym" and "at" are all possible (issue #8)
             #LHS: fixing issue #22 (uncovered in issue #18) - if there's a none complement alternate, include it.                

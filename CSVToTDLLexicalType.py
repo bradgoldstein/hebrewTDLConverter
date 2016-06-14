@@ -34,7 +34,16 @@ if __name__ == '__main__':
     print "loading existing verbs into verb converter..."
     verbRowConverter.loadAllVerbs(partsOfSpeechList[posList_indices_c["verb"]], lexicon_c)
     print "loading PMI_Dictionary into verb converter..."
-    verbRowConverter.loadPMIDictionary()
+    verbRowConverter.loadPMIDictionary()#original
+
+##    pmidic = verbRowConverter.loadPMIDictionary()#lhs debug
+##    keys = pmidic.keys()
+##    keys.sort()
+##    for key in keys:
+##        val = pmidic[key]
+##        #if len(val) == 4 and 'at' in val and 'b' in val and 'yl' in val and 'clause' in val:
+##        if 'b' in val and 'at' in val and 'yl' in val and ('l' in val or 'al' in val):
+##            print(str(key) + ': ' + str(val))
 
     csv_f = openCSV("lexica/new_dinflections.csv", '\t')
     # skip the header row
@@ -65,10 +74,11 @@ if __name__ == '__main__':
         print(str(k) + ' -> ' + str(verbRowConverter.allVerbs[k]))
     #LHS: print out all the adverbs
     for item in advRowConverter.allAdvs:
-        print(str(item))
+        print(str(item))'''
+
     verbCompKeys = verbRowConverter.verbsComplements.keys()#LHS test
     for k in verbCompKeys:#LHS test
-        print(str(k) + ' -> ' + str(verbRowConverter.verbsComplements[k]))#LHS test'''
+        print(str(k) + ' -> ' + str(verbRowConverter.verbsComplements[k]))#LHS test
 
     print "printing noun lexicon..."
     nounRowConverter.printAllNouns(lexicon_c, "lexica/lexicon_noun.tdl")
