@@ -28,11 +28,9 @@ utfToTransliteration.py - contains a function for converting between the .csv fi
 
 /lexica/lexicon.tdl - the existing .tdl entries.
 
-/lexica/lexicon_*pos*.tdl - the generated .tdl entries for the specified part of speech. Only includes words without
-    punctuation in the stem.
+/lexica/lexicon_*pos*.tdl - the generated .tdl entries for the specified part of speech. 
 
-/lexica/lexicon_*pos*.tdl - the generated .tdl entries for the specified part of speech. Only includes words with
-    punctuation in the stem.
+/lexica/lexicon_*pos*.tdl - the generated .tdl entries for the specified part of speech. 
 
 /lexica/*pos*_types.tdl - all of the types generated for the specified part of speech.
 
